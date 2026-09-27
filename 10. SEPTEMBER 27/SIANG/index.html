@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Board Exam Reviewer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#16a34a',
+                            600: '#15803d',
+                            700: '#166534',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for rendering math/structural formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-brand-500 text-white flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-compass-drafting text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-900 tracking-tight leading-none">ArchiReview</h1>
+                    <span class="text-xs text-slate-500 font-medium">Architecture Licensure Exam Prep</span>
+                </div>
+            </div>
+            <div id="quiz-header-info" class="hidden flex items-center space-x-6 text-sm font-medium text-slate-600">
+                <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-lg">
+                    <i class="fa-regular fa-clock text-slate-400"></i>
+                    <span id="timer" class="font-mono text-slate-800">00:00</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-lg">
+                    <i class="fa-solid fa-layer-group text-slate-400"></i>
+                    <span id="progress-text">Question 1 of 30</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 md:p-6">
+
+        <!-- Setup / Start View -->
+        <section id="start-view" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 md:p-10">
+            <div class="text-center max-w-xl mx-auto mb-8">
+                <div class="w-16 h-16 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">Architecture Board Exam Mock Test</h2>
+                <p class="text-slate-600">30 Comprehensive multiple-choice items with instant grading and detailed architectural explanations.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 max-w-2xl mx-auto">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Subject Domain</label>
+                    <select id="subject-select" class="w-full border border-slate-300 rounded-xl p-3 text-slate-700 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition">
+                        <option value="all">All Domains (Mixed 30-Item Mock Exam)</option>
+                        <option value="history">History & Theory of Architecture / Planning</option>
+                        <option value="tech">Building Tech, Materials & Utilities</option>
+                        <option value="practice">Professional Practice & Building Laws</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Timer Option</label>
+                    <select id="time-select" class="w-full border border-slate-300 rounded-xl p-3 text-slate-700 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition">
+                        <option value="untimed">Untimed (Self-Paced Practice)</option>
+                        <option value="timed">Timed Session (30 Minutes Total)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-2xl mx-auto mb-8 text-xs md:text-sm text-amber-900 flex items-start space-x-3">
+                <i class="fa-solid fa-bolt text-amber-600 text-lg mt-0.5"></i>
+                <div>
+                    <span class="font-bold block mb-0.5">Instant Feedback Enabled:</span>
+                    Selecting an answer instantly lock choices for that question and displays whether your response was correct along with detailed architectural references.
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button id="start-btn" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-8 py-4 rounded-xl shadow-md hover:shadow-lg transition duration-200 flex items-center space-x-3 text-lg">
+                    <span>Start 30-Question Session</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Quiz Active View -->
+        <section id="quiz-view" class="hidden space-y-6">
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                <div id="progress-bar" class="bg-brand-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                <div class="flex items-center justify-between mb-4">
+                    <span id="question-category" class="bg-brand-50 text-brand-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-brand-100">
+                        General Architecture
+                    </span>
+                    <span id="item-number-badge" class="text-xs font-semibold text-slate-400">
+                        Item <span id="current-item-num">1</span> of 30
+                    </span>
+                </div>
+
+                <!-- Question Text -->
+                <h3 id="question-text" class="text-lg md:text-xl font-bold text-slate-900 mb-6 leading-relaxed">
+                    Loading question...
+                </h3>
+
+                <!-- Options Grid -->
+                <div id="options-container" class="space-y-3">
+                    <!-- Options injected via JavaScript -->
+                </div>
+
+                <!-- Immediate Explanation Box -->
+                <div id="explanation-box" class="hidden mt-6 p-5 rounded-xl transition-all duration-300 border">
+                    <div id="explanation-status" class="font-bold text-sm mb-1 flex items-center space-x-2">
+                        <!-- Dynamic Status Icon & Title -->
+                    </div>
+                    <p id="explanation-text" class="text-sm leading-relaxed mt-2 text-slate-700"></p>
+                </div>
+            </div>
+
+            <!-- Quiz Navigation Controls -->
+            <div class="flex justify-between items-center">
+                <button id="prev-btn" class="px-5 py-2.5 rounded-xl border border-slate-300 font-semibold text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition">
+                    <i class="fa-solid fa-chevron-left mr-2"></i>Previous
+                </button>
+                
+                <div class="space-x-2">
+                    <button id="next-btn" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 font-semibold text-white shadow transition">
+                        Next Question <i class="fa-solid fa-chevron-right ml-2"></i>
+                    </button>
+                    <button id="submit-btn" class="hidden px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 font-semibold text-white shadow transition">
+                        Complete & View Results <i class="fa-solid fa-flag-checkered ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results View -->
+        <section id="results-view" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+            <div class="text-center max-w-xl mx-auto mb-8">
+                <div id="score-icon" class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">
+                    <!-- Dynamic Icon -->
+                </div>
+                <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Session Completed</h2>
+                <p id="result-message" class="text-slate-600">Here is your overall performance report.</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Score</div>
+                    <div id="result-score" class="text-2xl font-extrabold text-slate-900 mt-1">0%</div>
+                </div>
+                <div class="bg-emerald-50/60 p-4 rounded-xl text-center border border-emerald-100">
+                    <div class="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Correct</div>
+                    <div id="result-correct" class="text-2xl font-extrabold text-emerald-600 mt-1">0</div>
+                </div>
+                <div class="bg-rose-50/60 p-4 rounded-xl text-center border border-rose-100">
+                    <div class="text-xs font-semibold text-rose-700 uppercase tracking-wider">Incorrect</div>
+                    <div id="result-incorrect" class="text-2xl font-extrabold text-rose-600 mt-1">0</div>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Time Spent</div>
+                    <div id="result-time" class="text-2xl font-extrabold text-slate-900 mt-1">00:00</div>
+                </div>
+            </div>
+
+            <!-- Question Review List -->
+            <div class="mb-8">
+                <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-list-check text-brand-600"></i>
+                    <span>Question Breakdown</span>
+                </h3>
+                <div id="review-container" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                    <!-- Review items injected via JS -->
+                </div>
+            </div>
+
+            <div class="flex justify-center space-x-4">
+                <button id="restart-btn" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-8 py-3.5 rounded-xl shadow transition flex items-center space-x-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Start New 30-Item Session</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500">
+        Architecture Board Exam Reviewer &copy; 2026. Designed for Licensure Examination for Architects (LEA) practice.
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // 30 Architecture Board Exam Questions Bank
+        const masterQuestionBank = [
+            // HISTORY, THEORY & PLANNING (10 Items)
+            {
+                id: 1,
+                category: "history",
+                categoryLabel: "History & Theory of Architecture",
+                question: "Which Roman architect and engineer wrote 'De Architectura' (Ten Books on Architecture), establishing the triadic principles of Firmitas, Utilitas, and Venustas?",
+                options: ["Vitruvius", "Palladio", "Brunelleschi", "Alberti"],
+                correctIndex: 0,
+                explanation: "Marcus Vitruvius Pollio was a Roman author and architect who authored 'De Architectura'. He posited that a structure must embody Durability (Firmitas), Utility (Utilitas), and Beauty (Venustas)."
+            },
+            {
+                id: 2,
+                category: "history",
+                categoryLabel: "History & Theory of Architecture",
+                question: "In classical Greek architecture, what term defines the slight optical adjustment/curvature added to columns to correct the illusion of concavity?",
+                options: ["Stylobate", "Entasis", "Volute", "Architrave"],
+                correctIndex: 1,
+                explanation: "Entasis is the slight convex swelling built into the shaft of classical columns to prevent the optical illusion of the column appearing thin or concave in the middle."
+            },
+            {
+                id: 3,
+                category: "history",
+                categoryLabel: "History & Theory of Architecture",
+                question: "Who designed the iconic Fallingwater (Kaufmann Residence) in Bear Run, Pennsylvania, exemplifying Organic Architecture?",
+                options: ["Le Corbusier", "Frank Lloyd Wright", "Mies van der Rohe", "Walter Gropius"],
+                correctIndex: 1,
+                explanation: "Frank Lloyd Wright designed Fallingwater in 1935, demonstrating his philosophy of Organic Architecture where structure and nature exist in complete harmony."
+            },
+            {
+                id: 4,
+                category: "history",
+                categoryLabel: "History & Theory of Architecture",
+                question: "Which architectural movement coined the slogan 'Less is More', heavily utilizing steel frameworks and glass curtain walls?",
+                options: ["Art Nouveau", "Deconstructivism", "International Style / Modernism", "Brutalism"],
+                correctIndex: 2,
+                explanation: "Ludwig Mies van der Rohe, a pioneer of Modernism and the International Style, popularized 'Less is More', prioritizing minimalism, structural efficiency, and transparency."
+            },
+            {
+                id: 5,
+                category: "history",
+                categoryLabel: "Urban Planning & Theory",
+                question: "Who proposed the 'Garden City' movement in 1898, advocating self-contained communities surrounded by greenbelts?",
+                options: ["Le Corbusier", "Ebenezer Howard", "Daniel Burnham", "Jane Jacobs"],
+                correctIndex: 1,
+                explanation: "Sir Ebenezer Howard proposed the Garden City model to combine the benefits of city and countryside living while avoiding urban sprawl."
+            },
+            {
+                id: 6,
+                category: "history",
+                categoryLabel: "History & Theory of Architecture",
+                question: "What gothic architectural innovation allowed thin exterior walls and massive stained glass windows by transferring roof vault thrust outwards?",
+                options: ["Pendentive", "Flying Buttress", "Corbel Arch", "Barrel Vault"],
+                correctIndex: 1,
+                explanation: "The flying buttress carries the outward lateral forces of heavy masonry roof vaults away from the main walls down to external piers, enabling tall glass-filled walls."
+            },
+            {
+                id: 7,
+                category: "history",
+                categoryLabel: "Philippine Architecture History",
+                question: "What traditional Filipino lowland dwelling features an elevated living area on wooden stilts with a high-pitched thatched roof designed for tropical ventilation?",
+                options: ["Ivatan Torogan", "Bahay Kubo", "Bahay na Bato", "Bale"],
+                correctIndex: 1,
+                explanation: "The Bahay Kubo (Nipa Hut) is a indigenous stilt house built with bamboo and nipa/cogongrass, optimized for cross-ventilation and flood resilience in the humid tropics."
+            },
+            {
+                id: 8,
+                category: "history",
+                categoryLabel: "History & Theory of Architecture",
+                question: "Which Master Architect designed the Sydney Opera House, renowned for its dramatic precast concrete roof shells?",
+                options: ["Jørn Utzon", "Eero Saarinen", "Renzo Piano", "Oscar Niemeyer"],
+                correctIndex: 0,
+                explanation: "Danish architect Jørn Utzon won the international competition in 1957 to design the Sydney Opera House, an iconic landmark of 20th-century Expressionist architecture."
+            },
+            {
+                id: 9,
+                category: "history",
+                categoryLabel: "Urban Planning & Theory",
+                question: "In urban design, what term refers to the visual perimeter line or path along which people move through a city (defined by Kevin Lynch)?",
+                options: ["Nodes", "Districts", "Paths", "Landmarks"],
+                correctIndex: 2,
+                explanation: "In 'The Image of the City', Kevin Lynch categorizes city elements into Paths, Edges, Districts, Nodes, and Landmarks. Paths are channels along which the observer moves."
+            },
+            {
+                id: 10,
+                category: "history",
+                categoryLabel: "Philippine Architecture History",
+                question: "Which National Artist for Architecture designed the Cultural Center of the Philippines (CCP) Main Building?",
+                options: ["Juan Nakpil", "Leandro Locsin", "Pablo Antonio", "Francisco Mañosa"],
+                correctIndex: 1,
+                explanation: "Leandro V. Locsin designed the CCP Main Building (Tanghalang Nicanor Abelardo), featuring his signature floating block aesthetic in concrete."
+            },
+
+            // BUILDING TECHNOLOGY, MATERIALS & UTILITIES (10 Items)
+            {
+                id: 11,
+                category: "tech",
+                categoryLabel: "Building Technology & Materials",
+                question: "What is the standard water-to-cement ratio range ideal for achieving maximum structural concrete compressive strength while retaining workability?",
+                options: ["0.20 – 0.30", "0.40 – 0.45", "0.65 – 0.85", "1.00 – 1.20"],
+                correctIndex: 1,
+                explanation: "A water-cement ratio of 0.40 to 0.45 balances full cement hydration with high strength and low permeability; excessive water weakens the concrete matrix."
+            },
+            {
+                id: 12,
+                category: "tech",
+                categoryLabel: "Building Utilities - Plumbing",
+                question: "In plumbing systems, what essential fitting prevents sewer gases from backing up into occupied building spaces?",
+                options: ["Cleanout", "P-Trap", "Check Valve", "Reducer"],
+                correctIndex: 1,
+                explanation: "A P-Trap maintains a small water seal inside its dip, forming an airtight barrier against foul sewer gas entering through fixtures."
+            },
+            {
+                id: 13,
+                category: "tech",
+                categoryLabel: "Building Construction & Joinery",
+                question: "Which type of brick bond consists of alternating courses of stretchers and headers?",
+                options: ["Running Bond", "English Bond", "Flemish Bond", "Stack Bond"],
+                correctIndex: 1,
+                explanation: "English Bond consists of alternate full courses of headers and stretchers, considered one of the strongest brick masonry patterns."
+            },
+            {
+                id: 14,
+                category: "tech",
+                categoryLabel: "Building Utilities - Electrical",
+                question: "What electrical device automatically disconnects power when it detects an imbalance between incoming and outgoing current to prevent fatal electrical shocks?",
+                options: ["Circuit Breaker", "GFCI (Ground Fault Circuit Interrupter)", "Transformer", "Busway"],
+                correctIndex: 1,
+                explanation: "GFCIs shut off electrical power in milliseconds when current leakage to ground is detected, serving as a critical safety feature in wet areas like bathrooms and kitchens."
+            },
+            {
+                id: 15,
+                category: "tech",
+                categoryLabel: "Building Technology & Materials",
+                question: "What type of foundation is used when soil bearing capacity is very low, distributing total structural loads across the entire building footprint?",
+                options: ["Isolated Footing", "Strip Footing", "Mat / Raft Foundation", "Combined Footing"],
+                correctIndex: 2,
+                explanation: "A Mat or Raft Foundation is a continuous thick reinforced concrete slab supporting the entire building, ideal for low load-bearing or soft soil strata."
+            },
+            {
+                id: 16,
+                category: "tech",
+                categoryLabel: "Acoustics & Lighting",
+                question: "What unit measures luminous flux—the total quantity of visible light emitted by a light source per unit of time?",
+                options: ["Lux", "Lumen", "Candela", "Foot-candle"],
+                correctIndex: 1,
+                explanation: "Lumen (lm) measures total luminous flux output. Lux measures illuminance (lumens per square meter)."
+            },
+            {
+                id: 17,
+                category: "tech",
+                categoryLabel: "Building Technology - Wood",
+                question: "In lumber processing, what natural defect is caused by longitudinal wood grain separation between annual growth rings?",
+                options: ["Knot", "Shake", "Wane", "Check"],
+                correctIndex: 1,
+                explanation: "A shake is a crack/separation in wood occurring between and parallel to the annual growth rings."
+            },
+            {
+                id: 18,
+                category: "tech",
+                categoryLabel: "Building Utilities - HVAC",
+                question: "What refrigeration cycle component converts low-pressure refrigerant gas into a high-pressure, high-temperature vapor?",
+                options: ["Evaporator", "Expansion Valve", "Compressor", "Condenser"],
+                correctIndex: 2,
+                explanation: "The Compressor pumps refrigerant through the system, compressing vapor to raise its pressure and temperature before sending it to the condenser."
+            },
+            {
+                id: 19,
+                category: "tech",
+                categoryLabel: "Structural Systems",
+                question: "What structural phenomenon causes a slender vertical column to suddenly collapse laterally under axial compressive forces before reaching material yield stress?",
+                options: ["Shear failure", "Buckling", "Torsion", "Tension rupture"],
+                correctIndex: 1,
+                explanation: "Buckling is a structural instability caused by axial compression in slender members, causing lateral deflection prior to material crush."
+            },
+            {
+                id: 20,
+                category: "tech",
+                categoryLabel: "Building Materials - Glass",
+                question: "Which safety glass is manufactured through controlled thermal or chemical treatments, making it 4 times stronger than annealed glass and causing it to break into small granular pieces?",
+                options: ["Laminated Glass", "Tempered Glass", "Plate Glass", "Wired Glass"],
+                correctIndex: 1,
+                explanation: "Tempered glass undergoes rapid heating and cooling to create surface compression, resisting impact and crumbling into blunt fragments when fractured."
+            },
+
+            // PROFESSIONAL PRACTICE & LAWS (10 Items)
+            {
+                id: 21,
+                category: "practice",
+                categoryLabel: "Professional Practice & Laws",
+                question: "Under Philippine Republic Act 9266 (The Architecture Act of 2004), what entity regulates the registration and licensing of architects?",
+                options: ["UAP", "PRBOA (Professional Regulatory Board of Architecture)", "DPWH", "DHumanSettlements"],
+                correctIndex: 1,
+                explanation: "PRBOA under the Professional Regulation Commission (PRC) administers exams, regulates registration, and enforces RA 9266 standards."
+            },
+            {
+                id: 22,
+                category: "practice",
+                categoryLabel: "Building Laws - National Building Code",
+                question: "Under the National Building Code of the Philippines (PD 1096), what is the maximum percentage of site occupancy (PSO) for an Open Market Residential (R-1) lot with isolated border walls?",
+                options: ["50%", "60%", "70%", "80%"],
+                correctIndex: 1,
+                explanation: "For single-family detached R-1 zoning under PD 1096 guidelines, maximum allowable PSO is generally 60% with unpaved open space (TOSL) requirements."
+            },
+            {
+                id: 23,
+                category: "practice",
+                categoryLabel: "Professional Practice - SPP Documents",
+                question: "Under SPP Document 201 (Pre-Detailed Design Services), what standard method of compensation is based on direct salaries multiplied by a factor plus offset expenses?",
+                options: ["Lump Sum", "Multiple of Direct Personnel Expenses (MDPE)", "Percentage of Project Construction Cost", "Per Diem"],
+                correctIndex: 1,
+                explanation: "MDPE multiplies direct technical personnel salaries by a multiplier (typically 1.5 to 2.5) to cover overhead and profit."
+            },
+            {
+                id: 24,
+                category: "practice",
+                categoryLabel: "Fire Code of the Philippines (RA 9514)",
+                question: "Under RA 9514 (Fire Code), what is the minimum clear width required for egress corridors serving an occupant load of 50 or more?",
+                options: ["900 mm", "1100 mm", "1200 mm", "1500 mm"],
+                correctIndex: 1,
+                explanation: "The Fire Code mandates a minimum exit access corridor width of 1120 mm (commonly rounded to 1100 mm / 44 inches) for occupant loads exceeding 50."
+            },
+            {
+                id: 25,
+                category: "practice",
+                categoryLabel: "Accessibility Law (BP 344)",
+                question: "Under Batas Pambansa 344 (Accessibility Law), what is the maximum allowable slope gradient for wheelchair ramps?",
+                options: ["1:8", "1:10", "1:12", "1:15"],
+                correctIndex: 2,
+                explanation: "BP 344 stipulates a maximum ramp slope of 1:12 (8.33%). Slopes steeper than 1:12 are difficult for independent wheelchair navigation."
+            },
+            {
+                id: 26,
+                category: "practice",
+                categoryLabel: "Building Laws - PD 1096",
+                question: "What metric is defined as the ratio of total gross floor area of a building to the total area of the lot on which it stands?",
+                options: ["FLAR (Floor Lot Area Ratio)", "AMBF (Allowable Max Building Footprint)", "PSO", "TOSL"],
+                correctIndex: 0,
+                explanation: "Floor Lot Area Ratio (FLAR or FAR) governs urban density by limiting total floor square footage relative to lot size."
+            },
+            {
+                id: 27,
+                category: "practice",
+                categoryLabel: "Professional Practice - SPP 202",
+                question: "What phase of the Architect's Regular Design Services (SPP 202) involves preparing working drawings, specifications, and bill of quantities?",
+                options: ["Schematic Design Phase", "Design Development Phase", "Contract Document Phase", "Construction Phase"],
+                correctIndex: 2,
+                explanation: "During the Contract Document Phase, the Architect prepares comprehensive final construction drawings and specifications needed for bidding and permits."
+            },
+            {
+                id: 28,
+                category: "practice",
+                categoryLabel: "Fire Code - RA 9514",
+                question: "What is the maximum travel distance to an exit in a building without an automatic fire suppression / sprinkler system?",
+                options: ["30 meters", "45 meters", "60 meters", "75 meters"],
+                correctIndex: 1,
+                explanation: "Without an approved automatic sprinkler system, maximum egress travel distance is 46 meters (approx 150 ft / 45 m); sprinkled buildings allow up to 61 meters."
+            },
+            {
+                id: 29,
+                category: "practice",
+                categoryLabel: "Accessibility Law - BP 344",
+                question: "According to BP 344, what is the required clear opening width for accessible doors to allow unhindered wheelchair passage?",
+                options: ["700 mm", "800 mm", "900 mm", "1000 mm"],
+                correctIndex: 1,
+                explanation: "Accessible doors under BP 344 must provide a minimum clear opening width of 800 mm measured between the door face and door stop."
+            },
+            {
+                id: 30,
+                category: "practice",
+                categoryLabel: "Professional Practice - Civil Code Article 1723",
+                question: "Under Civil Code Art. 1723, for how many years is the Architect or Engineer who drew plans liable if a building collapses due to defects in plans or ground failure?",
+                options: ["5 Years", "10 Years", "15 Years", "20 Years"],
+                correctIndex: 2,
+                explanation: "Article 1723 specifies a 15-year period of legal liability for architects and engineers in case of structural ruin resulting from plan defects or soil deficiencies."
+            }
+        ];
+
+        // State Management
+        let sessionQuestions = [];
+        let currentIndex = 0;
+        let userAnswers = {}; // { questionId: selectedIndex }
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let isTimed = false;
+
+        // DOM Elements
+        const startView = document.getElementById('start-view');
+        const quizView = document.getElementById('quiz-view');
+        const resultsView = document.getElementById('results-view');
+        const quizHeaderInfo = document.getElementById('quiz-header-info');
+
+        const subjectSelect = document.getElementById('subject-select');
+        const timeSelect = document.getElementById('time-select');
+        const startBtn = document.getElementById('start-btn');
+
+        const questionCategory = document.getElementById('question-category');
+        const questionText = document.getElementById('question-text');
+        const currentItemNum = document.getElementById('current-item-num');
+        const optionsContainer = document.getElementById('options-container');
+        const explanationBox = document.getElementById('explanation-box');
+        const explanationStatus = document.getElementById('explanation-status');
+        const explanationText = document.getElementById('explanation-text');
+
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const timerDisplay = document.getElementById('timer');
+
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // Event Listeners
+        startBtn.addEventListener('click', startQuiz);
+        prevBtn.addEventListener('click', showPreviousQuestion);
+        nextBtn.addEventListener('click', showNextQuestion);
+        submitBtn.addEventListener('click', finishQuiz);
+        restartBtn.addEventListener('click', resetQuiz);
+
+        // Core Functions
+        function startQuiz() {
+            const selectedSubject = subjectSelect.value;
+            isTimed = timeSelect.value === 'timed';
+
+            // Filter or load 30 items
+            if (selectedSubject === 'all') {
+                sessionQuestions = [...masterQuestionBank];
+            } else {
+                // If filtered, select subset or duplicate to build 30 items if required
+                const filtered = masterQuestionBank.filter(q => q.category === selectedSubject);
+                sessionQuestions = [...filtered];
+            }
+
+            // Shuffle slightly for variance while keeping 30 count
+            sessionQuestions.sort(() => 0.5 - Math.random());
+            sessionQuestions = sessionQuestions.slice(0, 30);
+
+            // Reset state
+            currentIndex = 0;
+            userAnswers = {};
+            secondsElapsed = 0;
+
+            // UI Adjustments
+            startView.classList.add('hidden');
+            resultsView.classList.add('hidden');
+            quizView.classList.remove('hidden');
+            quizHeaderInfo.classList.remove('hidden');
+
+            startTimer();
+            renderQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerDisplay.textContent = "00:00";
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+                const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+                timerDisplay.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function renderQuestion() {
+            const q = sessionQuestions[currentIndex];
+            const hasAnswered = userAnswers[q.id] !== undefined;
+            const selectedOpt = userAnswers[q.id];
+
+            // Progress UI
+            progressText.textContent = `Question ${currentIndex + 1} of ${sessionQuestions.length}`;
+            currentItemNum.textContent = currentIndex + 1;
+            const pct = ((currentIndex + 1) / sessionQuestions.length) * 100;
+            progressBar.style.width = `${pct}%`;
+
+            // Category & Question Text
+            questionCategory.textContent = q.categoryLabel;
+            questionText.textContent = `${q.question}`;
+
+            // Render Options
+            optionsContainer.innerHTML = '';
+            q.options.forEach((optText, optIdx) => {
+                const isSelected = selectedOpt === optIdx;
+                const isCorrect = q.correctIndex === optIdx;
+
+                const optBtn = document.createElement('button');
+                optBtn.disabled = hasAnswered; // Lock once answered
+
+                // Dynamic Styling based on feedback
+                let styleClasses = "w-full text-left p-4 rounded-xl border text-sm md:text-base transition-all flex items-start space-x-3.5 ";
+
+                if (hasAnswered) {
+                    if (isCorrect) {
+                        styleClasses += "border-emerald-500 bg-emerald-50 text-emerald-900 font-medium shadow-sm";
+                    } else if (isSelected) {
+                        styleClasses += "border-rose-500 bg-rose-50 text-rose-900 font-medium shadow-sm";
+                    } else {
+                        styleClasses += "border-slate-200 opacity-50 bg-slate-50 text-slate-500";
+                    }
+                } else {
+                    styleClasses += "border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 text-slate-700 hover:text-brand-900 shadow-sm";
+                }
+
+                optBtn.className = styleClasses;
+
+                // Letter Badge Styling
+                let badgeStyle = "w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 border mt-0.5 ";
+                if (hasAnswered) {
+                    if (isCorrect) badgeStyle += "bg-emerald-600 text-white border-emerald-600";
+                    else if (isSelected) badgeStyle += "bg-rose-600 text-white border-rose-600";
+                    else badgeStyle += "border-slate-300 text-slate-400";
+                } else {
+                    badgeStyle += "border-slate-300 text-slate-500 bg-slate-100";
+                }
+
+                optBtn.innerHTML = `
+                    <span class="${badgeStyle}">${String.fromCharCode(65 + optIdx)}</span>
+                    <span class="flex-1 leading-snug">${optText}</span>
+                    ${hasAnswered && isCorrect ? '<i class="fa-solid fa-circle-check text-emerald-600 text-lg ml-2"></i>' : ''}
+                    ${hasAnswered && isSelected && !isCorrect ? '<i class="fa-solid fa-circle-xmark text-rose-600 text-lg ml-2"></i>' : ''}
+                `;
+
+                optBtn.onclick = () => selectOption(q.id, optIdx);
+                optionsContainer.appendChild(optBtn);
+            });
+
+            // Instant Feedback Explanation Box
+            if (hasAnswered) {
+                const isUserCorrect = selectedOpt === q.correctIndex;
+                explanationBox.classList.remove('hidden');
+
+                if (isUserCorrect) {
+                    explanationBox.className = "mt-6 p-5 rounded-xl border bg-emerald-50/70 border-emerald-200 text-slate-800";
+                    explanationStatus.className = "font-bold text-sm flex items-center space-x-2 text-emerald-800";
+                    explanationStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-base"></i> <span>Correct Answer!</span>`;
+                } else {
+                    explanationBox.className = "mt-6 p-5 rounded-xl border bg-rose-50/70 border-rose-200 text-slate-800";
+                    explanationStatus.className = "font-bold text-sm flex items-center space-x-2 text-rose-800";
+                    explanationStatus.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 text-base"></i> <span>Incorrect. Correct Option: (${String.fromCharCode(65 + q.correctIndex)}) ${q.options[q.correctIndex]}</span>`;
+                }
+
+                explanationText.innerHTML = `<strong class="font-semibold text-slate-900 block mb-1">Architectural Rationale:</strong> ${q.explanation}`;
+            } else {
+                explanationBox.classList.add('hidden');
+            }
+
+            // Navigation State Controls
+            prevBtn.disabled = currentIndex === 0;
+            if (currentIndex === sessionQuestions.length - 1) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            }
+
+            // MathJax rendering
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function selectOption(questionId, optionIndex) {
+            // Register answer instantly & re-render to display explanation
+            userAnswers[questionId] = optionIndex;
+            renderQuestion();
+        }
+
+        function showNextQuestion() {
+            if (currentIndex < sessionQuestions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            }
+        }
+
+        function showPreviousQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+
+            let correctCount = 0;
+            sessionQuestions.forEach(q => {
+                if (userAnswers[q.id] === q.correctIndex) {
+                    correctCount++;
+                }
+            });
+
+            const total = sessionQuestions.length;
+            const incorrectCount = total - correctCount;
+            const percentage = Math.round((correctCount / total) * 100);
+
+            // Populate Results UI
+            document.getElementById('result-score').textContent = `${percentage}%`;
+            document.getElementById('result-correct').textContent = correctCount;
+            document.getElementById('result-incorrect').textContent = incorrectCount;
+            
+            const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+            const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+            document.getElementById('result-time').textContent = `${mins}:${secs}`;
+
+            // Score Banner Configuration
+            const scoreIcon = document.getElementById('score-icon');
+            const resultMsg = document.getElementById('result-message');
+
+            if (percentage >= 70) {
+                scoreIcon.className = "w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl bg-emerald-100 text-emerald-700 shadow-inner";
+                scoreIcon.innerHTML = `<i class="fa-solid fa-award"></i>`;
+                resultMsg.textContent = "Passing Mark Attained! Excellent architectural knowledge.";
+            } else {
+                scoreIcon.className = "w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl bg-amber-100 text-amber-700 shadow-inner";
+                scoreIcon.innerHTML = `<i class="fa-solid fa-book-bookmark"></i>`;
+                resultMsg.textContent = "Keep reviewing! Study the detailed breakdown below to address key areas.";
+            }
+
+            // Render Detailed Review Section
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.innerHTML = '';
+
+            sessionQuestions.forEach((q, idx) => {
+                const userAns = userAnswers[q.id];
+                const isCorrect = userAns === q.correctIndex;
+
+                const reviewCard = document.createElement('div');
+                reviewCard.className = `p-4 rounded-xl border ${isCorrect ? 'border-emerald-200 bg-emerald-50/40' : 'border-rose-200 bg-rose-50/40'}`;
+                
+                reviewCard.innerHTML = `
+                    <div class="flex items-start justify-between mb-2 gap-2">
+                        <span class="font-bold text-sm text-slate-900 leading-snug">${idx + 1}. ${q.question}</span>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-md shrink-0 ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                            ${isCorrect ? 'Correct' : 'Incorrect'}
+                        </span>
+                    </div>
+                    <div class="text-xs text-slate-600 space-y-1 mt-2 bg-white/70 p-3 rounded-lg border border-slate-100">
+                        <div><span class="font-bold text-slate-700">Your Selection:</span> ${userAns !== undefined ? `(${String.fromCharCode(65 + userAns)}) ${q.options[userAns]}` : '<span class="text-amber-600 italic">Unanswered</span>'}</div>
+                        ${!isCorrect ? `<div><span class="font-bold text-emerald-700">Correct Answer:</span> (${String.fromCharCode(65 + q.correctIndex)}) ${q.options[q.correctIndex]}</div>` : ''}
+                        <div class="mt-2 text-slate-500"><strong class="text-slate-700">Explanation:</strong> ${q.explanation}</div>
+                    </div>
+                `;
+                reviewContainer.appendChild(reviewCard);
+            });
+
+            // Switch Views
+            quizView.classList.add('hidden');
+            quizHeaderInfo.classList.add('hidden');
+            resultsView.classList.remove('hidden');
+        }
+
+        function resetQuiz() {
+            resultsView.classList.add('hidden');
+            startView.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
